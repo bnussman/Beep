@@ -14,8 +14,17 @@ export class BeepResolver {
    
     @Query(() => BeepsResponse)
     @Authorized(UserRole.ADMIN)
-    public async getBeeps(@Ctx() ctx: Context, @Args() { offset, show }: PaginationArgs): Promise<BeepsResponse> {
-        const [beeps, count] = await ctx.em.findAndCount(Beep, {}, { orderBy: { end: QueryOrder.DESC }, limit: show, offset: offset, populate: ['beeper', 'rider'] });
+    public async getBeeps(@Ctx() ctx: Context, @Args() { offset, show }: PaginationArgs, @Arg('id', { nullable: true }) id?: string): Promise<BeepsResponse> {
+        const [beeps, count] = await ctx.em.findAndCount(
+            Beep,
+            {},
+            {
+                orderBy: { end: QueryOrder.DESC },
+                limit: show,
+                offset: offset,
+                populate: ['beeper', 'rider'],
+                filters: id ? { in: { id } } : undefined
+            });
 
         return {
             items: beeps,

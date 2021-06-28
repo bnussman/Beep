@@ -311,13 +311,12 @@ export type Query = {
   getLastBeepToRate?: Maybe<Beep>;
   getUser: User;
   getUsers: UsersResponse;
-  getRideHistory: RideHistoryResponse;
-  getBeepHistory: BeepHistoryResponse;
   getQueue: Array<QueueEntry>;
 };
 
 
 export type QueryGetBeepsArgs = {
+  id?: Maybe<Scalars['String']>;
   offset?: Maybe<Scalars['Int']>;
   show?: Maybe<Scalars['Int']>;
   query?: Maybe<Scalars['String']>;
@@ -342,7 +341,6 @@ export type QueryGetLocationSuggestionsArgs = {
 
 
 export type QueryGetRatingsArgs = {
-  me?: Maybe<Scalars['Boolean']>;
   id?: Maybe<Scalars['String']>;
   offset?: Maybe<Scalars['Int']>;
   show?: Maybe<Scalars['Int']>;
@@ -373,22 +371,6 @@ export type QueryGetUserArgs = {
 
 
 export type QueryGetUsersArgs = {
-  offset?: Maybe<Scalars['Int']>;
-  show?: Maybe<Scalars['Int']>;
-  query?: Maybe<Scalars['String']>;
-};
-
-
-export type QueryGetRideHistoryArgs = {
-  id?: Maybe<Scalars['String']>;
-  offset?: Maybe<Scalars['Int']>;
-  show?: Maybe<Scalars['Int']>;
-  query?: Maybe<Scalars['String']>;
-};
-
-
-export type QueryGetBeepHistoryArgs = {
-  id?: Maybe<Scalars['String']>;
   offset?: Maybe<Scalars['Int']>;
   show?: Maybe<Scalars['Int']>;
   query?: Maybe<Scalars['String']>;
@@ -817,37 +799,23 @@ export type ReportUserMutation = (
   & Pick<Mutation, 'reportUser'>
 );
 
-export type GetBeepHistoryQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetBeepHistoryQueryVariables = Exact<{
+  id?: Maybe<Scalars['String']>;
+}>;
 
 
 export type GetBeepHistoryQuery = (
   { __typename?: 'Query' }
-  & { getBeepHistory: (
-    { __typename?: 'BeepHistoryResponse' }
-    & Pick<BeepHistoryResponse, 'count'>
+  & { getBeeps: (
+    { __typename?: 'BeepsResponse' }
+    & Pick<BeepsResponse, 'count'>
     & { items: Array<(
       { __typename?: 'Beep' }
       & Pick<Beep, 'id' | 'start' | 'end' | 'groupSize' | 'origin' | 'destination'>
       & { rider: (
         { __typename?: 'User' }
         & Pick<User, 'id' | 'name' | 'first' | 'last' | 'photoUrl'>
-      ) }
-    )> }
-  ) }
-);
-
-export type GetRideHistoryQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetRideHistoryQuery = (
-  { __typename?: 'Query' }
-  & { getRideHistory: (
-    { __typename?: 'RideHistoryResponse' }
-    & Pick<RideHistoryResponse, 'count'>
-    & { items: Array<(
-      { __typename?: 'Beep' }
-      & Pick<Beep, 'id' | 'start' | 'end' | 'groupSize' | 'origin' | 'destination'>
-      & { beeper: (
+      ), beeper: (
         { __typename?: 'User' }
         & Pick<User, 'id' | 'name' | 'first' | 'last' | 'photoUrl'>
       ) }
@@ -855,35 +823,12 @@ export type GetRideHistoryQuery = (
   ) }
 );
 
-export type GetRatingsIMadeQueryVariables = Exact<{
+export type GetRatingsQueryVariables = Exact<{
   id?: Maybe<Scalars['String']>;
-  me?: Maybe<Scalars['Boolean']>;
 }>;
 
 
-export type GetRatingsIMadeQuery = (
-  { __typename?: 'Query' }
-  & { getRatings: (
-    { __typename?: 'RatingsResponse' }
-    & Pick<RatingsResponse, 'count'>
-    & { items: Array<(
-      { __typename?: 'Rating' }
-      & Pick<Rating, 'id' | 'stars' | 'timestamp' | 'message'>
-      & { rated: (
-        { __typename?: 'User' }
-        & Pick<User, 'id' | 'name' | 'photoUrl'>
-      ) }
-    )> }
-  ) }
-);
-
-export type GetRatingsOnMeQueryVariables = Exact<{
-  id?: Maybe<Scalars['String']>;
-  me?: Maybe<Scalars['Boolean']>;
-}>;
-
-
-export type GetRatingsOnMeQuery = (
+export type GetRatingsQuery = (
   { __typename?: 'Query' }
   & { getRatings: (
     { __typename?: 'RatingsResponse' }
@@ -892,6 +837,9 @@ export type GetRatingsOnMeQuery = (
       { __typename?: 'Rating' }
       & Pick<Rating, 'id' | 'stars' | 'timestamp' | 'message'>
       & { rater: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'name' | 'photoUrl'>
+      ), rated: (
         { __typename?: 'User' }
         & Pick<User, 'id' | 'name' | 'photoUrl'>
       ) }
@@ -1707,8 +1655,8 @@ export type ReportUserMutationHookResult = ReturnType<typeof useReportUserMutati
 export type ReportUserMutationResult = ApolloReactCommon.MutationResult<ReportUserMutation>;
 export type ReportUserMutationOptions = ApolloReactCommon.BaseMutationOptions<ReportUserMutation, ReportUserMutationVariables>;
 export const GetBeepHistoryDocument = gql`
-    query GetBeepHistory {
-  getBeepHistory {
+    query GetBeepHistory($id: String) {
+  getBeeps(id: $id) {
     items {
       id
       start
@@ -1717,6 +1665,13 @@ export const GetBeepHistoryDocument = gql`
       origin
       destination
       rider {
+        id
+        name
+        first
+        last
+        photoUrl
+      }
+      beeper {
         id
         name
         first
@@ -1741,6 +1696,7 @@ export const GetBeepHistoryDocument = gql`
  * @example
  * const { data, loading, error } = useGetBeepHistoryQuery({
  *   variables: {
+ *      id: // value for 'id'
  *   },
  * });
  */
@@ -1755,63 +1711,19 @@ export function useGetBeepHistoryLazyQuery(baseOptions?: ApolloReactHooks.LazyQu
 export type GetBeepHistoryQueryHookResult = ReturnType<typeof useGetBeepHistoryQuery>;
 export type GetBeepHistoryLazyQueryHookResult = ReturnType<typeof useGetBeepHistoryLazyQuery>;
 export type GetBeepHistoryQueryResult = ApolloReactCommon.QueryResult<GetBeepHistoryQuery, GetBeepHistoryQueryVariables>;
-export const GetRideHistoryDocument = gql`
-    query GetRideHistory {
-  getRideHistory {
-    items {
-      id
-      start
-      end
-      groupSize
-      origin
-      destination
-      beeper {
-        id
-        name
-        first
-        last
-        photoUrl
-      }
-    }
-    count
-  }
-}
-    `;
-
-/**
- * __useGetRideHistoryQuery__
- *
- * To run a query within a React component, call `useGetRideHistoryQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetRideHistoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetRideHistoryQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetRideHistoryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetRideHistoryQuery, GetRideHistoryQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<GetRideHistoryQuery, GetRideHistoryQueryVariables>(GetRideHistoryDocument, options);
-      }
-export function useGetRideHistoryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetRideHistoryQuery, GetRideHistoryQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<GetRideHistoryQuery, GetRideHistoryQueryVariables>(GetRideHistoryDocument, options);
-        }
-export type GetRideHistoryQueryHookResult = ReturnType<typeof useGetRideHistoryQuery>;
-export type GetRideHistoryLazyQueryHookResult = ReturnType<typeof useGetRideHistoryLazyQuery>;
-export type GetRideHistoryQueryResult = ApolloReactCommon.QueryResult<GetRideHistoryQuery, GetRideHistoryQueryVariables>;
-export const GetRatingsIMadeDocument = gql`
-    query GetRatingsIMade($id: String, $me: Boolean) {
-  getRatings(id: $id, me: $me) {
+export const GetRatingsDocument = gql`
+    query GetRatings($id: String) {
+  getRatings(id: $id) {
     items {
       id
       stars
       timestamp
       message
+      rater {
+        id
+        name
+        photoUrl
+      }
       rated {
         id
         name
@@ -1824,80 +1736,32 @@ export const GetRatingsIMadeDocument = gql`
     `;
 
 /**
- * __useGetRatingsIMadeQuery__
+ * __useGetRatingsQuery__
  *
- * To run a query within a React component, call `useGetRatingsIMadeQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetRatingsIMadeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetRatingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetRatingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetRatingsIMadeQuery({
+ * const { data, loading, error } = useGetRatingsQuery({
  *   variables: {
  *      id: // value for 'id'
- *      me: // value for 'me'
  *   },
  * });
  */
-export function useGetRatingsIMadeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetRatingsIMadeQuery, GetRatingsIMadeQueryVariables>) {
+export function useGetRatingsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetRatingsQuery, GetRatingsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<GetRatingsIMadeQuery, GetRatingsIMadeQueryVariables>(GetRatingsIMadeDocument, options);
+        return ApolloReactHooks.useQuery<GetRatingsQuery, GetRatingsQueryVariables>(GetRatingsDocument, options);
       }
-export function useGetRatingsIMadeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetRatingsIMadeQuery, GetRatingsIMadeQueryVariables>) {
+export function useGetRatingsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetRatingsQuery, GetRatingsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<GetRatingsIMadeQuery, GetRatingsIMadeQueryVariables>(GetRatingsIMadeDocument, options);
+          return ApolloReactHooks.useLazyQuery<GetRatingsQuery, GetRatingsQueryVariables>(GetRatingsDocument, options);
         }
-export type GetRatingsIMadeQueryHookResult = ReturnType<typeof useGetRatingsIMadeQuery>;
-export type GetRatingsIMadeLazyQueryHookResult = ReturnType<typeof useGetRatingsIMadeLazyQuery>;
-export type GetRatingsIMadeQueryResult = ApolloReactCommon.QueryResult<GetRatingsIMadeQuery, GetRatingsIMadeQueryVariables>;
-export const GetRatingsOnMeDocument = gql`
-    query GetRatingsOnMe($id: String, $me: Boolean) {
-  getRatings(id: $id, me: $me) {
-    items {
-      id
-      stars
-      timestamp
-      message
-      rater {
-        id
-        name
-        photoUrl
-      }
-    }
-    count
-  }
-}
-    `;
-
-/**
- * __useGetRatingsOnMeQuery__
- *
- * To run a query within a React component, call `useGetRatingsOnMeQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetRatingsOnMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetRatingsOnMeQuery({
- *   variables: {
- *      id: // value for 'id'
- *      me: // value for 'me'
- *   },
- * });
- */
-export function useGetRatingsOnMeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetRatingsOnMeQuery, GetRatingsOnMeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<GetRatingsOnMeQuery, GetRatingsOnMeQueryVariables>(GetRatingsOnMeDocument, options);
-      }
-export function useGetRatingsOnMeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetRatingsOnMeQuery, GetRatingsOnMeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<GetRatingsOnMeQuery, GetRatingsOnMeQueryVariables>(GetRatingsOnMeDocument, options);
-        }
-export type GetRatingsOnMeQueryHookResult = ReturnType<typeof useGetRatingsOnMeQuery>;
-export type GetRatingsOnMeLazyQueryHookResult = ReturnType<typeof useGetRatingsOnMeLazyQuery>;
-export type GetRatingsOnMeQueryResult = ApolloReactCommon.QueryResult<GetRatingsOnMeQuery, GetRatingsOnMeQueryVariables>;
+export type GetRatingsQueryHookResult = ReturnType<typeof useGetRatingsQuery>;
+export type GetRatingsLazyQueryHookResult = ReturnType<typeof useGetRatingsLazyQuery>;
+export type GetRatingsQueryResult = ApolloReactCommon.QueryResult<GetRatingsQuery, GetRatingsQueryVariables>;
 export const GetInitialRiderStatusDocument = gql`
     query GetInitialRiderStatus {
   getRiderStatus {

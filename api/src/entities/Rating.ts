@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryKey, Property, Unique } from "@mikro-orm/core";
+import { Entity, Filter, ManyToOne, PrimaryKey, Property, Unique } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
 import { v4 } from "uuid";
 import { Beep } from "./Beep";
@@ -6,6 +6,7 @@ import { User } from "./User";
 
 @ObjectType()
 @Entity()
+@Filter({ name: 'in', cond: args => ({ $or: [{ rater: args.id } , { rated: args.id }] })})
 @Unique({ properties: ['beep', 'rater'] })
 export class Rating {
 

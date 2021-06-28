@@ -86,6 +86,7 @@ export class UserResolver {
         };
     }
 
+    /*
     @Query(() => RideHistoryResponse)
     @Authorized()
     public async getRideHistory(@Ctx() ctx: Context, @Args() { offset, show }: PaginationArgs, @Arg("id", { nullable: true }) id?: string): Promise<RideHistoryResponse> {
@@ -107,6 +108,7 @@ export class UserResolver {
             count: count
         };
     }
+    */
 
     @Query(() => [QueueEntry])
     @Authorized()

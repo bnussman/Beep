@@ -2,7 +2,7 @@ import React, {useContext} from 'react';
 import { StyleSheet } from 'react-native';
 import { Layout, Button, Card, Text } from '@ui-kitten/components';
 import { ThemeContext } from '../../utils/ThemeContext';
-import { AuthenticatedUserContextData, UserContext } from '../../utils/UserContext';
+import { UserContext } from '../../utils/UserContext';
 import { PhotoIcon, LogIcon, ThemeIcon, LogoutIcon, ProfileIcon, PasswordIcon, ForwardIcon } from '../../utils/Icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProfilePicture from '../../components/ProfilePicture';
@@ -119,7 +119,7 @@ export function MainSettingsScreen({ navigation }: any) {
                     Change Password
                 </Button>
                 <Button
-                    onPress={() => navigation.navigate("RideLogScreen")}
+                    onPress={() => navigation.navigate("BeepsScreen")}
                     accessoryLeft={LogIcon}
                     accessoryRight={ForwardIcon}
                     style={styles.button}

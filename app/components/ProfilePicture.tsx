@@ -1,6 +1,5 @@
-import React, { Component } from "react";
-import { View, Image } from "react-native";
-import { LoadingIndicator } from "../utils/Icons";
+import React, { PureComponent } from "react";
+import { Image } from "react-native";
 
 interface Props {
     url: string;
@@ -13,7 +12,7 @@ interface State {
     isError: boolean;
 }
 
-export default class ProfilePicture extends Component<Props, State> {
+export default class ProfilePicture extends PureComponent<Props, State> {
 
     constructor(props: Props) {
         super(props);

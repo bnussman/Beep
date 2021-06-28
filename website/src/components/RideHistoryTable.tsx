@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { Card } from './Card';
 import { gql, useQuery } from '@apollo/client';
-import { GetRideHistoryQuery } from '../generated/graphql';
+import { GetBeepsQuery } from '../generated/graphql';
 import Pagination from './Pagination';
 import React, { useState } from 'react';
 import { Box, Center, Spinner, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
@@ -15,8 +15,8 @@ interface Props {
 }
 
 const Hisory = gql`
-    query GetRideHistory($id: String!, $show: Int, $offset: Int) {
-        getRideHistory(id: $id, show: $show, offset: $offset) {
+    query GetBeeps($id: String, $show: Int, $offset: Int) {
+        getBeeps(id: $id, show: $show, offset: $offset) {
             items {
                 id
                 origin
@@ -32,6 +32,14 @@ const Hisory = gql`
                     last
                     name
                 }
+                rider {
+                    id
+                    photoUrl
+                    username
+                    first
+                    last
+                    name
+                }
             }
             count
         }
@@ -40,7 +48,7 @@ const Hisory = gql`
 
 function RideHistoryTable(props: Props) {
   const pageLimit = 5;
-  const { data, loading, refetch } = useQuery<GetRideHistoryQuery>(Hisory, { variables: { id: props.userId, offset: 0, show: pageLimit } });
+  const { data, loading, refetch } = useQuery<GetBeepsQuery>(Hisory, { variables: { id: props.userId, offset: 0, show: pageLimit } });
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   async function fetchHistory(page: number) {
@@ -50,7 +58,7 @@ function RideHistoryTable(props: Props) {
     })
   }
 
-  if (data?.getRideHistory && data.getRideHistory.items.length === 0) {
+  if (data?.getBeeps && data.getBeeps.items.length === 0) {
     return (
       <Center h="100px">
         This user has no ride history.
@@ -69,7 +77,7 @@ function RideHistoryTable(props: Props) {
   return (
     <Box>
       <Pagination
-        resultCount={data?.getRideHistory?.count}
+        resultCount={data?.getBeeps?.count}
         limit={pageLimit}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
@@ -80,6 +88,7 @@ function RideHistoryTable(props: Props) {
           <Thead>
             <Tr>
               <Th>Beeper</Th>
+              <Th>Rider</Th>
               <Th>Origin</Th>
               <Th>Destination</Th>
               <Th>Group Size</Th>
@@ -89,10 +98,11 @@ function RideHistoryTable(props: Props) {
             </Tr>
           </Thead>
           <Tbody>
-            {data?.getRideHistory && (data.getRideHistory.items).map(ride => {
+            {data?.getBeeps && (data.getBeeps.items).map(ride => {
               return (
                 <Tr key={ride.id}>
                   <TdUser user={ride.beeper} />
+                  <TdUser user={ride.rider} />
                   <Td>{ride.origin}</Td>
                   <Td>{ride.destination}</Td>
                   <Td>{ride.groupSize}</Td>
@@ -106,7 +116,7 @@ function RideHistoryTable(props: Props) {
         </Table>
       </Card>
       <Pagination
-        resultCount={data?.getRideHistory?.count}
+        resultCount={data?.getBeeps?.count}
         limit={pageLimit}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}

@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, Filter, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
 import { User } from "./User";
 import { v4 } from 'uuid';
@@ -6,8 +6,9 @@ import { QueueEntry } from "./QueueEntry";
 
 @ObjectType()
 @Entity()
+@Filter({ name: 'in', cond: args => ({ $or: [{ beeper: args.id } , { rider: args.id }] })})
 export class Beep {
-
+    
     @PrimaryKey()
     @Field()
     id: string = v4();

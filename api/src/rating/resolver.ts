@@ -48,31 +48,16 @@ export class RatingResolver {
 
     @Query(() => RatingsResponse)
     @Authorized()
-    public async getRatings(@Ctx() ctx: Context, @Args() { offset, show }: PaginationArgs, @Arg('id', { nullable: true }) id?: string, @Arg('me', { nullable: true }) me?: boolean): Promise<RatingsResponse> {
-        let filter = {};
-
-        if (me) {
-            filter = {
-                rated: id || ctx.user.id
-            };
-        }
-        else if(me == false) {
-            filter = {
-                rater: id || ctx.user.id
-            };
-        }
-
-        console.log(me, filter);
-
-        const [ratings, count] = await ctx.em.findAndCount(Rating, filter, {
+    public async getRatings(@Ctx() ctx: Context, @Args() { offset, show }: PaginationArgs, @Arg('id', { nullable: true }) id?: string): Promise<RatingsResponse> {
+        const [ratings, count] = await ctx.em.findAndCount(Rating, {}, {
             orderBy: { timestamp: QueryOrder.DESC },
             populate: ['rater', 'rated'],
             offset: offset,
-            limit: show
+            limit: show,
+            filters: id ? { in: { id } } : undefined
         });
 
         return {
-            // @ts-ignore what
             items: ratings,
             count: count
         };

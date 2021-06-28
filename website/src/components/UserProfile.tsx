@@ -2,7 +2,6 @@ import { NavLink } from 'react-router-dom';
 import { useHistory } from "react-router-dom";
 import { formatPhone } from '../utils/formatters';
 import RideHistoryTable from './RideHistoryTable';
-import BeepHistoryTable from './BeepHistoryTable';
 import QueueTable from './QueueTable';
 import { UserRole } from '../types/User';
 import { gql, useMutation } from '@apollo/client';
@@ -15,6 +14,7 @@ import { DeleteIcon } from '@chakra-ui/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import LocationView from '../routes/admin/users/Location';
+import RatingsTable from './RatingsTable';
 
 dayjs.extend(relativeTime);
 
@@ -95,8 +95,8 @@ function UserProfile(props: Props) {
                     <Tab>Details</Tab>
                     <Tab>Location</Tab>
                     <Tab>Queue</Tab>
-                    <Tab>Beep History</Tab>
-                    <Tab>Ride History</Tab>
+                    <Tab>Beeps</Tab>
+                    <Tab>Ratings</Tab>
                 </TabList>
 
                 <TabPanels>
@@ -159,10 +159,10 @@ function UserProfile(props: Props) {
                         <QueueTable queue={user.queue} />
                     </TabPanel>
                     <TabPanel>
-                        <BeepHistoryTable userId={user.id} />
+                        <RideHistoryTable userId={user.id} />
                     </TabPanel>
                     <TabPanel>
-                        <RideHistoryTable userId={user.id} />
+                        <RatingsTable userId={user.id} />
                     </TabPanel>
                 </TabPanels>
             </Tabs>

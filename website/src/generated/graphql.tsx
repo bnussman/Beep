@@ -310,13 +310,12 @@ export type Query = {
   getLastBeepToRate?: Maybe<Beep>;
   getUser: User;
   getUsers: UsersResponse;
-  getRideHistory: RideHistoryResponse;
-  getBeepHistory: BeepHistoryResponse;
   getQueue: Array<QueueEntry>;
 };
 
 
 export type QueryGetBeepsArgs = {
+  id?: Maybe<Scalars['String']>;
   offset?: Maybe<Scalars['Int']>;
   show?: Maybe<Scalars['Int']>;
   query?: Maybe<Scalars['String']>;
@@ -341,7 +340,6 @@ export type QueryGetLocationSuggestionsArgs = {
 
 
 export type QueryGetRatingsArgs = {
-  me?: Maybe<Scalars['Boolean']>;
   id?: Maybe<Scalars['String']>;
   offset?: Maybe<Scalars['Int']>;
   show?: Maybe<Scalars['Int']>;
@@ -372,22 +370,6 @@ export type QueryGetUserArgs = {
 
 
 export type QueryGetUsersArgs = {
-  offset?: Maybe<Scalars['Int']>;
-  show?: Maybe<Scalars['Int']>;
-  query?: Maybe<Scalars['String']>;
-};
-
-
-export type QueryGetRideHistoryArgs = {
-  id?: Maybe<Scalars['String']>;
-  offset?: Maybe<Scalars['Int']>;
-  show?: Maybe<Scalars['Int']>;
-  query?: Maybe<Scalars['String']>;
-};
-
-
-export type QueryGetBeepHistoryArgs = {
-  id?: Maybe<Scalars['String']>;
   offset?: Maybe<Scalars['Int']>;
   show?: Maybe<Scalars['Int']>;
   query?: Maybe<Scalars['String']>;
@@ -612,45 +594,51 @@ export type ResendEmailMutation = (
   & Pick<Mutation, 'resendEmailVarification'>
 );
 
-export type GetBeeperHistoryQueryVariables = Exact<{
+export type GetRatingsQueryVariables = Exact<{
+  id?: Maybe<Scalars['String']>;
   show?: Maybe<Scalars['Int']>;
   offset?: Maybe<Scalars['Int']>;
-  id: Scalars['String'];
 }>;
 
 
-export type GetBeeperHistoryQuery = (
+export type GetRatingsQuery = (
   { __typename?: 'Query' }
-  & { getBeepHistory: (
-    { __typename?: 'BeepHistoryResponse' }
-    & Pick<BeepHistoryResponse, 'count'>
+  & { getRatings: (
+    { __typename?: 'RatingsResponse' }
+    & Pick<RatingsResponse, 'count'>
     & { items: Array<(
-      { __typename?: 'Beep' }
-      & Pick<Beep, 'id' | 'origin' | 'destination' | 'start' | 'end' | 'groupSize'>
-      & { rider: (
+      { __typename?: 'Rating' }
+      & Pick<Rating, 'id' | 'stars' | 'message' | 'timestamp'>
+      & { rater: (
         { __typename?: 'User' }
-        & Pick<User, 'id' | 'photoUrl' | 'username' | 'first' | 'last' | 'name'>
+        & Pick<User, 'id' | 'photoUrl' | 'username' | 'name'>
+      ), rated: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'photoUrl' | 'username' | 'name'>
       ) }
     )> }
   ) }
 );
 
-export type GetRideHistoryQueryVariables = Exact<{
-  id: Scalars['String'];
+export type GetBeepsQueryVariables = Exact<{
+  id?: Maybe<Scalars['String']>;
   show?: Maybe<Scalars['Int']>;
   offset?: Maybe<Scalars['Int']>;
 }>;
 
 
-export type GetRideHistoryQuery = (
+export type GetBeepsQuery = (
   { __typename?: 'Query' }
-  & { getRideHistory: (
-    { __typename?: 'RideHistoryResponse' }
-    & Pick<RideHistoryResponse, 'count'>
+  & { getBeeps: (
+    { __typename?: 'BeepsResponse' }
+    & Pick<BeepsResponse, 'count'>
     & { items: Array<(
       { __typename?: 'Beep' }
       & Pick<Beep, 'id' | 'origin' | 'destination' | 'start' | 'end' | 'groupSize'>
       & { beeper: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'photoUrl' | 'username' | 'first' | 'last' | 'name'>
+      ), rider: (
         { __typename?: 'User' }
         & Pick<User, 'id' | 'photoUrl' | 'username' | 'first' | 'last' | 'name'>
       ) }
@@ -1201,22 +1189,24 @@ export function useResendEmailMutation(baseOptions?: Apollo.MutationHookOptions<
 export type ResendEmailMutationHookResult = ReturnType<typeof useResendEmailMutation>;
 export type ResendEmailMutationResult = Apollo.MutationResult<ResendEmailMutation>;
 export type ResendEmailMutationOptions = Apollo.BaseMutationOptions<ResendEmailMutation, ResendEmailMutationVariables>;
-export const GetBeeperHistoryDocument = gql`
-    query GetBeeperHistory($show: Int, $offset: Int, $id: String!) {
-  getBeepHistory(show: $show, offset: $offset, id: $id) {
+export const GetRatingsDocument = gql`
+    query GetRatings($id: String, $show: Int, $offset: Int) {
+  getRatings(id: $id, show: $show, offset: $offset) {
     items {
       id
-      origin
-      destination
-      start
-      end
-      groupSize
-      rider {
+      stars
+      message
+      timestamp
+      rater {
         id
         photoUrl
         username
-        first
-        last
+        name
+      }
+      rated {
+        id
+        photoUrl
+        username
         name
       }
     }
@@ -1226,37 +1216,37 @@ export const GetBeeperHistoryDocument = gql`
     `;
 
 /**
- * __useGetBeeperHistoryQuery__
+ * __useGetRatingsQuery__
  *
- * To run a query within a React component, call `useGetBeeperHistoryQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetBeeperHistoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetRatingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetRatingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetBeeperHistoryQuery({
+ * const { data, loading, error } = useGetRatingsQuery({
  *   variables: {
+ *      id: // value for 'id'
  *      show: // value for 'show'
  *      offset: // value for 'offset'
- *      id: // value for 'id'
  *   },
  * });
  */
-export function useGetBeeperHistoryQuery(baseOptions: Apollo.QueryHookOptions<GetBeeperHistoryQuery, GetBeeperHistoryQueryVariables>) {
+export function useGetRatingsQuery(baseOptions?: Apollo.QueryHookOptions<GetRatingsQuery, GetRatingsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetBeeperHistoryQuery, GetBeeperHistoryQueryVariables>(GetBeeperHistoryDocument, options);
+        return Apollo.useQuery<GetRatingsQuery, GetRatingsQueryVariables>(GetRatingsDocument, options);
       }
-export function useGetBeeperHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBeeperHistoryQuery, GetBeeperHistoryQueryVariables>) {
+export function useGetRatingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRatingsQuery, GetRatingsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetBeeperHistoryQuery, GetBeeperHistoryQueryVariables>(GetBeeperHistoryDocument, options);
+          return Apollo.useLazyQuery<GetRatingsQuery, GetRatingsQueryVariables>(GetRatingsDocument, options);
         }
-export type GetBeeperHistoryQueryHookResult = ReturnType<typeof useGetBeeperHistoryQuery>;
-export type GetBeeperHistoryLazyQueryHookResult = ReturnType<typeof useGetBeeperHistoryLazyQuery>;
-export type GetBeeperHistoryQueryResult = Apollo.QueryResult<GetBeeperHistoryQuery, GetBeeperHistoryQueryVariables>;
-export const GetRideHistoryDocument = gql`
-    query GetRideHistory($id: String!, $show: Int, $offset: Int) {
-  getRideHistory(id: $id, show: $show, offset: $offset) {
+export type GetRatingsQueryHookResult = ReturnType<typeof useGetRatingsQuery>;
+export type GetRatingsLazyQueryHookResult = ReturnType<typeof useGetRatingsLazyQuery>;
+export type GetRatingsQueryResult = Apollo.QueryResult<GetRatingsQuery, GetRatingsQueryVariables>;
+export const GetBeepsDocument = gql`
+    query GetBeeps($id: String, $show: Int, $offset: Int) {
+  getBeeps(id: $id, show: $show, offset: $offset) {
     items {
       id
       origin
@@ -1272,6 +1262,14 @@ export const GetRideHistoryDocument = gql`
         last
         name
       }
+      rider {
+        id
+        photoUrl
+        username
+        first
+        last
+        name
+      }
     }
     count
   }
@@ -1279,16 +1277,16 @@ export const GetRideHistoryDocument = gql`
     `;
 
 /**
- * __useGetRideHistoryQuery__
+ * __useGetBeepsQuery__
  *
- * To run a query within a React component, call `useGetRideHistoryQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetRideHistoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetBeepsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBeepsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetRideHistoryQuery({
+ * const { data, loading, error } = useGetBeepsQuery({
  *   variables: {
  *      id: // value for 'id'
  *      show: // value for 'show'
@@ -1296,17 +1294,17 @@ export const GetRideHistoryDocument = gql`
  *   },
  * });
  */
-export function useGetRideHistoryQuery(baseOptions: Apollo.QueryHookOptions<GetRideHistoryQuery, GetRideHistoryQueryVariables>) {
+export function useGetBeepsQuery(baseOptions?: Apollo.QueryHookOptions<GetBeepsQuery, GetBeepsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetRideHistoryQuery, GetRideHistoryQueryVariables>(GetRideHistoryDocument, options);
+        return Apollo.useQuery<GetBeepsQuery, GetBeepsQueryVariables>(GetBeepsDocument, options);
       }
-export function useGetRideHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRideHistoryQuery, GetRideHistoryQueryVariables>) {
+export function useGetBeepsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBeepsQuery, GetBeepsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetRideHistoryQuery, GetRideHistoryQueryVariables>(GetRideHistoryDocument, options);
+          return Apollo.useLazyQuery<GetBeepsQuery, GetBeepsQueryVariables>(GetBeepsDocument, options);
         }
-export type GetRideHistoryQueryHookResult = ReturnType<typeof useGetRideHistoryQuery>;
-export type GetRideHistoryLazyQueryHookResult = ReturnType<typeof useGetRideHistoryLazyQuery>;
-export type GetRideHistoryQueryResult = Apollo.QueryResult<GetRideHistoryQuery, GetRideHistoryQueryVariables>;
+export type GetBeepsQueryHookResult = ReturnType<typeof useGetBeepsQuery>;
+export type GetBeepsLazyQueryHookResult = ReturnType<typeof useGetBeepsLazyQuery>;
+export type GetBeepsQueryResult = Apollo.QueryResult<GetBeepsQuery, GetBeepsQueryVariables>;
 export const LogoutDocument = gql`
     mutation Logout {
   logout(isApp: false)
