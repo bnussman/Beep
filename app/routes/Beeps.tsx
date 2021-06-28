@@ -1,13 +1,13 @@
-import React, {useContext} from 'react';
+import React, { useContext } from 'react';
 import { Layout, Text, Divider, List, ListItem, Spinner, TopNavigationAction, TopNavigation } from '@ui-kitten/components';
 import { StyleSheet } from 'react-native';
-import ProfilePicture from '../../components/ProfilePicture';
+import ProfilePicture from '../components/ProfilePicture';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { MainNavParamList } from '../../navigators/MainTabs';
+import { MainNavParamList } from '../navigators/MainTabs';
 import { gql, useQuery } from '@apollo/client';
-import { GetBeepHistoryQuery, Beep } from '../../generated/graphql';
-import {UserContext} from '../../utils/UserContext';
-import {BackIcon} from '../../utils/Icons';
+import { GetBeepHistoryQuery, Beep } from '../generated/graphql';
+import { UserContext } from '../utils/UserContext';
+import { BackIcon } from '../utils/Icons';
 
 interface Props {
     navigation: BottomTabNavigationProp<MainNavParamList>;
@@ -45,7 +45,7 @@ const GetBeepHistory = gql`
 
 export function BeepsScreen(props: Props) {
     const user = useContext(UserContext);
-    const { data, loading } = useQuery<GetBeepHistoryQuery>(
+    const { data, loading, error } = useQuery<GetBeepHistoryQuery>(
         GetBeepHistory,
         { variables: { id: user.id } }
     );
@@ -78,44 +78,41 @@ export function BeepsScreen(props: Props) {
         );
     };
 
-    if (!loading) {
-        if (data?.getBeeps && data.getBeeps.items.length > 0) {
-            return (
-                <>
-                <TopNavigation
-                    title='Beep Logs' 
-                    subtitle={`${data.getBeeps.count} beeps`}
-                    alignment='center' 
-                    accessoryLeft={BackAction} 
-                />
-                <Layout style={styles.container}>
+    return (
+        <>
+            <TopNavigation
+                title='Your Beeps' 
+                subtitle={`${data?.getBeeps.count || 'N/A'} beeps`}
+                alignment='center' 
+                accessoryLeft={BackAction} 
+            />
+            <Layout style={styles.container}>
+                {data?.getBeeps && data.getBeeps.items.length > 0 ?
                     <List
                         style={{width:"100%"}}
                         data={data?.getBeeps.items}
                         ItemSeparatorComponent={Divider}
                         renderItem={renderItem}
                     />
-                </Layout>
-                </>
-            );
-        }
-        else {
-            return (
-                <Layout style={styles.container}>
-                    <Text category='h5'>Nothing to display!</Text>
-                    <Text appearance='hint'>You have no previous beeps to display</Text>
-                </Layout>
-            );
-        }
-    }
-    else {
-        return (
-            <Layout style={styles.container}>
-                <Text category='h5'>Loading your history</Text>
-                <Spinner />
+                    :
+                        !loading &&
+                        <>
+                            <Text category='h5'>Nothing to display!</Text>
+                            <Text appearance='hint'>You have no previous beeps to display</Text>
+                        </>
+                }
+                {loading &&
+                    <>
+                        <Text category='h5'>Loading your history</Text>
+                        <Spinner />
+                    </>
+                }
+                {error && 
+                    <Text category='h5'>Unable to load your beeps</Text>
+                }
             </Layout>
-        );
-    }
+        </>
+    );
 }
 
 const styles = StyleSheet.create({

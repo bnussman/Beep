@@ -4,8 +4,8 @@ import { MainSettingsScreen } from '../routes/settings/Settings'
 import { EditProfileScreen } from '../routes/settings/EditProfile'
 import { ProfilePhotoScreen } from '../routes/settings/ProfilePhoto'
 import { ChangePasswordScreen } from '../routes/settings/ChangePassword'
-import { BeepsScreen } from '../routes/history/beeper';
-import { RatingsScreen } from '../routes/ratings/RatingsOnMe';
+import { BeepsScreen } from '../routes/Beeps';
+import { RatingsScreen } from '../routes/Ratings';
 
 const Stack = createStackNavigator();
 
