@@ -118,7 +118,9 @@ export class RiderResolver {
     @Query(() => [User])
     @Authorized()
     public async getBeeperList(@Ctx() ctx: Context): Promise<User[]> {
-        return await ctx.em.find(User, { isBeeping: true }, { refresh: true });
+        const beepers = await ctx.em.find(User, { isBeeping: true }, { populate: ['location'], refresh: true });
+        console.log(beepers);
+        return beepers;
     }
 
     @Query(() => Beep, { nullable: true })

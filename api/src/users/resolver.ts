@@ -86,30 +86,6 @@ export class UserResolver {
         };
     }
 
-    /*
-    @Query(() => RideHistoryResponse)
-    @Authorized()
-    public async getRideHistory(@Ctx() ctx: Context, @Args() { offset, show }: PaginationArgs, @Arg("id", { nullable: true }) id?: string): Promise<RideHistoryResponse> {
-        const [rides, count] = await ctx.em.findAndCount(Beep, { rider: id || ctx.user }, { orderBy: { end: QueryOrder.DESC }, populate: ['beeper', 'rider'], offset: offset, limit: show });
-
-        return {
-            items: rides,
-            count: count
-        };
-    }
-
-    @Query(() => BeepHistoryResponse)
-    @Authorized()
-    public async getBeepHistory(@Ctx() ctx: Context, @Args() { offset, show }: PaginationArgs, @Arg("id", { nullable: true }) id?: string): Promise<BeepHistoryResponse>  {
-        const [beeps, count] = await ctx.em.findAndCount(Beep, { beeper: id || ctx.user }, { orderBy: { end: QueryOrder.DESC }, populate: ['beeper', 'rider'], offset: offset, limit: show });
-
-        return {
-            items: beeps,
-            count: count
-        };
-    }
-    */
-
     @Query(() => [QueueEntry])
     @Authorized()
     public async getQueue(@Ctx() ctx: Context, @Info() info: GraphQLResolveInfo, @Arg("id", { nullable: true }) id?: string): Promise<QueueEntry[]> {

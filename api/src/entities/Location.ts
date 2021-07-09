@@ -1,7 +1,9 @@
 import { Entity, OneToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { PointType } from "../location/types";
 import { Field, ObjectType } from "type-graphql";
 import { v4 } from "uuid";
 import { User } from "./User";
+import { Point } from '../location/resolver';
 
 @ObjectType()
 @Entity()
@@ -16,12 +18,11 @@ export class Location {
     user!: User;
 
     @Field()
-    @Property({ columnType: 'numeric' })
-    latitude!: number;
-
-    @Field()
-    @Property({ columnType: 'numeric' })
-    longitude!: number;
+    @Property({
+        type: PointType,
+        columnType: 'geometry',
+    })
+    point!: Point;
 
     @Field()
     @Property({ columnType: 'numeric' })
