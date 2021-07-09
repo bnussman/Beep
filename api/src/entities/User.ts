@@ -1,9 +1,10 @@
-import { Collection, Entity, OneToMany, OneToOne, PrimaryKey, Property, Unique } from "@mikro-orm/core";
+import { Collection, Entity, OneToMany, PrimaryKey, Property, Unique } from "@mikro-orm/core";
 import { Authorized, Field, ObjectType } from "type-graphql";
 import { QueueEntry } from './QueueEntry';
-import { Location } from './Location';
 import { Rating } from './Rating';
-import {v4} from "uuid";
+import { v4 } from "uuid";
+import { PointType } from "../location/types";
+import { Point } from "../location/resolver";
 
 export enum UserRole {
     ADMIN = 'admin',
@@ -107,9 +108,13 @@ export class User {
         return `${this.first} ${this.last}`;
     }
 
-    @Field(() => Location, { nullable: true })
-    @OneToOne(() => Location, l => l.user, { nullable: true, lazy: true, eager: false })
-    location?: Location | null;
+    @Field({ nullable: true })
+    @Property({
+        type: PointType,
+        columnType: 'geometry',
+        nullable: true,
+    })
+    location?: Point;
 
     @Field(() => [QueueEntry])
     @OneToMany(() => QueueEntry, q => q.beeper, { orphanRemoval: true, lazy: true, eager: false })

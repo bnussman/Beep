@@ -31,7 +31,7 @@ const LocationUpdate = gql`
       $heading: Float!,
       $speed: Float!
     ) {
-      insertLocation(location: {
+      setLocation(location: {
         latitude: $latitude,
         longitude: $longitude,
         altitude: $altitude,

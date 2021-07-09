@@ -15,6 +15,7 @@ import Logger from '../../utils/Logger';
 import { client } from '../../utils/Apollo';
 import { RateCard } from '../../components/RateCard';
 import LocationInput from '../../components/LocationInput';
+import * as Location from 'expo-location';
 
 const InitialRiderStatus = gql`
     query GetInitialRiderStatus {
@@ -168,8 +169,18 @@ export function MainFindBeepScreen(props: Props) {
     }, [data]);
 
     async function findBeep(): Promise<void> {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+
+        if (status !== 'granted') {
+            return alert("You must enable location to find a ride.");
+        }
+
+        const position = await Location.getCurrentPositionAsync({});
+
         return props.navigation.navigate('PickBeepScreen', {
-            handlePick: (id: string) => chooseBeep(id)
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            handlePick: (id: string) => chooseBeep(id),
         });
     }
 

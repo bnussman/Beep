@@ -48,7 +48,8 @@
         "nodemailer": "^6.6.2",
         "reflect-metadata": "^0.1.13",
         "type-graphql": "^1.1.1",
-        "uuid": "^8.3.2"
+        "uuid": "^8.3.2",
+        "wkx": "^0.5.0"
     },
     "devDependencies": {
         "@mikro-orm/cli": "^4.5.6",
@@ -56,6 +57,7 @@
         "@types/cors": "^2.8.9",
         "@types/graphql-upload": "^8.0.5",
         "@types/koa-websocket": "^5.0.5",
+        "@types/node": "^16.3.1",
         "@types/node-fetch": "^2.5.10",
         "@types/nodemailer": "^6.4.2",
         "@types/uuid": "^8.3.0",

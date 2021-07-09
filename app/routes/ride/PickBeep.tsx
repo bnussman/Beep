@@ -15,8 +15,11 @@ interface Props {
 }
 
 const GetBeepers = gql`
-    query GetBeepers {
-        getBeeperList {
+    query GetBeeperList($latitude: Float!, $longitude: Float!) {
+        getBeeperList(input: {
+            latitude: $latitude,
+            longitude: $longitude
+        })  {
             id
             first
             last
@@ -36,7 +39,8 @@ const GetBeepers = gql`
 `;
 
 export function PickBeepScreen(props: Props) {
-    const { data, loading, error, startPolling, stopPolling } = useQuery<GetBeepersQuery>(GetBeepers);
+    const { navigation, route } = props;
+    const { data, loading, error, startPolling, stopPolling } = useQuery<GetBeepersQuery>(GetBeepers, { variables: { latitude: route.params.latitude, longitude: route.params.longitude }});
 
     useEffect(() => {
         startPolling(2000);
@@ -47,7 +51,6 @@ export function PickBeepScreen(props: Props) {
     }, []);
 
     function goBack(id: string): void {
-        const { navigation, route } = props;
         route.params.handlePick(id);
         navigation.goBack();
     }

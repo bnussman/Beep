@@ -7,7 +7,6 @@ import { BeeperSettingsInput, UpdateQueueEntryInput } from '../validators/beeper
 import * as Sentry from '@sentry/node';
 import { QueueEntry } from '../entities/QueueEntry';
 import { User } from '../entities/User';
-import { Location } from '../entities/Location';
 
 @Resolver(Beep)
 export class BeeperResolver {
@@ -102,7 +101,7 @@ export class BeeperResolver {
             ctx.em.persist(queueEntry);
         }
 
-        this.sendRiderUpdates(ctx.user, ctx.user.queue.getItems().sort(this.inOrder), pubSub, ctx.em);
+        this.sendRiderUpdates(ctx.user, ctx.user.queue.getItems().sort(this.inOrder), pubSub);
 
         await ctx.em.flush();
 
@@ -113,33 +112,17 @@ export class BeeperResolver {
         return a.start - b.start;
     }
 
-    private async sendRiderUpdates(beeper: User, queue: QueueEntry[], pubSub: PubSubEngine, em: EntityManager) {
+    private async sendRiderUpdates(beeper: User, queue: QueueEntry[], pubSub: PubSubEngine) {
         pubSub.publish("Beeper" + beeper.id, queue);
 
         for (const entry of queue) {
             entry.position = queue.filter((_entry: QueueEntry) => _entry.start < entry.start).length;
 
             if (entry.state == 1) {
-                const location: Location | null = await em.findOne(Location, { user: beeper.id });
-                pubSub.publish("Rider" + entry.rider.id, {
-                    ...entry,
-                    beeper: {
-                        ...entry.beeper,
-                        location: location ? {
-                            longitude: location.point.longitude,
-                            latitude: location.point.latitude
-                        } : undefined
-                    }
-                });
+                pubSub.publish("Rider" + entry.rider.id, entry);
             }
             else {
-                pubSub.publish("Rider" + entry.rider.id, {
-                    ...entry,
-                    beeper: {
-                        ...entry.beeper,
-                        location: undefined
-                    }
-                });
+                pubSub.publish("Rider" + entry.rider.id, entry);
             }
         }
     }
@@ -149,7 +132,7 @@ export class BeeperResolver {
     public async cancelBeep(@Ctx() ctx: Context, @Arg('id') id: string, @PubSub() pubSub: PubSubEngine): Promise<boolean> {
         const entry = ctx.em.getReference(QueueEntry, id);
 
-        await ctx.user.queue.init({ orderBy: { start: QueryOrder.ASC }, populate: ['rider', 'beeper', 'beeper.location'] });
+        await ctx.user.queue.init({ orderBy: { start: QueryOrder.ASC }, populate: ['rider', 'beeper'] });
 
         pubSub.publish("Beeper" + ctx.user.id, ctx.user.queue.getItems().filter(entry => entry.id != id));
 

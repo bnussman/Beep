@@ -1,5 +1,7 @@
 import { Type } from "@mikro-orm/core";
 import { Point } from '../location/resolver';
+import wkx from 'wkx';
+import { Buffer } from 'buffer';
 
 export class PointType extends Type<Point | undefined, string | undefined> {
 
@@ -12,24 +14,27 @@ export class PointType extends Type<Point | undefined, string | undefined> {
   }
 
   convertToJSValue(value: string | undefined): Point | undefined {
-    const m = value?.match(/point\((\d+(\.\d+)?) (\d+(\.\d+)?)\)/i);
+      if (!value) {
+          return undefined;
+      }
 
-    if (!m) {
-      return undefined;
-    }
+      // @ts-expect-error YOUR TYPES ARE SO BAD WHAT ARE YOU DOING??
+      const { coordinates } = value.charAt(0) == 'P' ?
+          wkx.Geometry.parse(value).toGeoJSON() : 
+          wkx.Geometry.parse(Buffer.from(value, 'hex')).toGeoJSON();
 
-    return new Point(+m[1], +m[3]);
+      return new Point(coordinates[0], coordinates[1]);
   }
 
   convertToJSValueSQL(key: string): string {
-    return `ST_AsText(${key})`;
+      return `ST_AsText(${key})`;
   }
 
   convertToDatabaseValueSQL(key: string): string {
-    return `ST_PointFromText(${key})`;
+      return `ST_PointFromText(${key})`;
   }
 
   getColumnType(): string {
-    return 'point';
+      return 'geometry';
   }
 }

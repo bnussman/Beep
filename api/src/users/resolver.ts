@@ -3,7 +3,6 @@ import { deleteUser } from '../account/helpers';
 import { QueryOrder, wrap } from '@mikro-orm/core';
 import { User, UserRole } from '../entities/User';
 import PaginationArgs from '../args/Pagination';
-import { Beep } from '../entities/Beep';
 import { QueueEntry } from '../entities/QueueEntry';
 import EditUserValidator from '../validators/user/EditUser';
 import { Context } from '../utils/context';
@@ -14,12 +13,6 @@ import { search } from './helpers';
 
 @ObjectType()
 export class UsersResponse extends Paginated(User) {}
-
-@ObjectType()
-class RideHistoryResponse extends Paginated(Beep) {}
-
-@ObjectType()
-class BeepHistoryResponse extends Paginated(Beep) {}
 
 @Resolver(User)
 export class UserResolver {

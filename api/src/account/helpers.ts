@@ -8,7 +8,6 @@ import { Beep } from "../entities/Beep";
 import { QueueEntry } from "../entities/QueueEntry";
 import { ForgotPassword } from "../entities/ForgotPassword";
 import { VerifyEmail } from "../entities/VerifyEmail";
-import { Location } from "../entities/Location";
 
 /**
  * Used for handling GraphQL Uploads
@@ -35,8 +34,6 @@ export function isEduEmail(email: string): boolean {
  * @returns boolean true if delete was successful
  */
 export async function deleteUser(user: User): Promise<boolean> {
-
-    await BeepORM.em.nativeDelete(Location, { user: user });
 
     await BeepORM.em.nativeDelete(ForgotPassword, { user: user });
 

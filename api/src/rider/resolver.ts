@@ -3,11 +3,10 @@ import { EntityManager, QueryOrder } from '@mikro-orm/core';
 import { QueueEntry } from '../entities/QueueEntry';
 import { User } from '../entities/User';
 import { Arg, Authorized, Ctx, Mutation, PubSub, PubSubEngine, Query, Resolver, Root, Subscription } from 'type-graphql';
-import GetBeepInput from '../validators/rider';
+import { GetBeepInput, FindBeepInput } from '../validators/rider';
 import { Context } from '../utils/context';
 import { Beep } from '../entities/Beep';
 import { Rating } from '../entities/Rating';
-import { Location } from '../entities/Location';
    
 @Resolver()
 export class RiderResolver {
@@ -77,11 +76,6 @@ export class RiderResolver {
 
         entry.position = entry.beeper.queue.getItems().filter((_entry: QueueEntry) => _entry.start < entry.start).length;
 
-        if (entry.state == 1) {
-            const location = await ctx.em.findOne(Location, { user: entry.beeper.id });
-            entry.beeper.location = location;
-        }
-
         return entry;
     }
     
@@ -117,10 +111,16 @@ export class RiderResolver {
     
     @Query(() => [User])
     @Authorized()
-    public async getBeeperList(@Ctx() ctx: Context): Promise<User[]> {
-        const beepers = await ctx.em.find(User, { isBeeping: true }, { populate: ['location'], refresh: true });
-        console.log(beepers);
-        return beepers;
+    public async getBeeperList(@Ctx() ctx: Context, @Arg('input') input: FindBeepInput): Promise<User[]> {
+        const connection = ctx.em.getConnection();
+
+        const raw: User[] = await connection.execute(`
+            SELECT * FROM public."user" WHERE ST_DistanceSphere(location, ST_MakePoint(${input.latitude},${input.longitude})) <= ${input.radius} * 1609.34 AND is_beeping = true
+        `);
+
+        const data = raw.map(user => ctx.em.map(User, user));
+
+        return data;
     }
 
     @Query(() => Beep, { nullable: true })
