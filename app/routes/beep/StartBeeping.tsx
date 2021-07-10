@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-import { StyleSheet, Linking, Platform, TouchableWithoutFeedback, Keyboard, Alert, AppState } from 'react-native';
+import { StyleSheet, Linking, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import { Card, Layout, Text, Button, Input, List, CheckBox } from '@ui-kitten/components';
 import { UserContext } from '../../utils/UserContext';
-import { isAndroid, isMobile } from "../../utils/config";
+import { isAndroid } from "../../utils/config";
 import ActionButton from "../../components/ActionButton";
 import AcceptDenyButton from "../../components/AcceptDenyButton";
 import { PhoneIcon, TextIcon, VenmoIcon, MapsIcon, DollarIcon } from '../../utils/Icons';
@@ -12,7 +12,7 @@ import ProfilePicture from '../../components/ProfilePicture';
 import Toggle from "./components/Toggle";
 import Logger from '../../utils/Logger';
 import { gql, useMutation, useQuery } from '@apollo/client';
-import { CancelBeepMutation, GetInitialQueueQuery, UpdateBeeperQueueMutation, UpdateBeepSettingsMutation } from '../../generated/graphql';
+import { GetInitialQueueQuery, UpdateBeepSettingsMutation } from '../../generated/graphql';
 import {client} from '../../utils/Apollo';
 
 interface Props {
@@ -464,7 +464,7 @@ export function StartBeepingScreen(props: Props) {
                                     </Layout>
                                     <Layout style={styles.row}>
                                         <Text category='h6'>Entered Queue</Text>
-                                        <Text style={styles.rowText}>{new Date(item.start).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</Text>
+                                        <Text style={styles.rowText}>{new Date(item.start * 1000).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</Text>
                                     </Layout>
                                     <Layout style={styles.row}>
                                         <Text category='h6'>Group Size</Text>

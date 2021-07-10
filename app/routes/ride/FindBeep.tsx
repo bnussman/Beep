@@ -114,7 +114,7 @@ export function MainFindBeepScreen(props: Props) {
     const { subscribeToMore, loading, data, previousData } = useQuery<GetInitialRiderStatusQuery>(InitialRiderStatus);
     const [getETA, { data: eta, loading: etaLoading, error: etaError}] = useLazyQuery<GetEtaQuery>(GetETA);
 
-    const [groupSize, setGroupSize] = useState<string>("1");
+    const [groupSize, setGroupSize] = useState<string>("");
     const [origin, setOrigin] = useState<string>("");
     const [destination, setDestination] = useState<string>("");
     const [isGetBeepLoading, setIsGetBeepLoading] = useState<boolean>(false);
