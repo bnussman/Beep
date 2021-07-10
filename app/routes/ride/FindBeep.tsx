@@ -119,6 +119,7 @@ export function MainFindBeepScreen(props: Props) {
     const [destination, setDestination] = useState<string>("");
     const [isGetBeepLoading, setIsGetBeepLoading] = useState<boolean>(false);
 
+    const originRef = useRef<any>();
     const destinationRef = useRef<any>();
     
     async function subscribeToLocation() {
@@ -175,11 +176,18 @@ export function MainFindBeepScreen(props: Props) {
             return alert("You must enable location to find a ride.");
         }
 
-        const position = await Location.getCurrentPositionAsync({});
+        let lastKnowLocation = await Location.getLastKnownPositionAsync({
+            maxAge: 180000,
+            requiredAccuracy: 800
+        });
+
+        if (!lastKnowLocation) {
+            lastKnowLocation = await Location.getCurrentPositionAsync();
+        }
 
         return props.navigation.navigate('PickBeepScreen', {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
+            latitude: lastKnowLocation.coords.latitude,
+            longitude: lastKnowLocation.coords.longitude,
             handlePick: (id: string) => chooseBeep(id),
         });
     }
@@ -277,8 +285,11 @@ export function MainFindBeepScreen(props: Props) {
                                 placeholder='Group Size'
                                 value={groupSize}
                                 onChangeText={value => setGroupSize(value)}
+                                onSubmitEditing={() => originRef.current.focus()}
+                                returnKeyType="next"
                             />
                             <LocationInput
+                                ref={originRef}
                                 label="Pick-up Location"
                                 value={origin}
                                 setValue={(value) => setOrigin(value)}

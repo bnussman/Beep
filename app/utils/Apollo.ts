@@ -5,8 +5,10 @@ import {getMainDefinition} from '@apollo/client/utilities';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createUploadLink } from 'apollo-upload-client';
 
-const wsUrl = __DEV__ ? "ws://localhost:3001/subscriptions" : "wss://staging.ridebeep.app/subscriptions";
-const url = __DEV__ ? "http://localhost:3001/graphql" : "https://staging.ridebeep.app/graphql";
+const ip = '192.168.1.57';
+
+const wsUrl = __DEV__ ? `ws://${ip}:3001/subscriptions` : "wss://staging.ridebeep.app/subscriptions";
+const url = __DEV__ ? `http://${ip}:3001/graphql` : "https://staging.ridebeep.app/graphql";
 //const wsUrl = "wss://staging.ridebeep.app/subscriptions";
 //const url = "https://staging.ridebeep.app/graphql";
 

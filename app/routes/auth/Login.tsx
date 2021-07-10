@@ -105,6 +105,7 @@ function LoginScreen(props: Props) {
                         onChangeText={(text) => setPassword(text)}
                         blurOnSubmit={true}
                         ref={passwordRef}
+                        onSubmitEditing={() => doLogin()}
                     />
                     {!loading ?
                         <Button
