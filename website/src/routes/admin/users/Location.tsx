@@ -1,6 +1,5 @@
 import {gql} from '@apollo/client';
 import { Avatar, Box, Center, Text } from '@chakra-ui/react';
-import dayjs from 'dayjs';
 import React, {useEffect} from 'react';
 import { User } from '../../../generated/graphql';
 import {client} from '../../../utils/Apollo';
@@ -71,7 +70,6 @@ function LocationView(props: Props) {
     return (
         <Box>
             <Text>{user.location?.latitude}, {user.location?.longitude}</Text>
-            <Text>{dayjs().to(user.location?.timestamp)}</Text>
             <div style={{ height: 350, width: '100%' }}>
             <GoogleMapReact
                 bootstrapURLKeys={{ key: 'AIzaSyBgabJrpu7-ELWiUIKJlpBz2mL6GYjwCVI' }}

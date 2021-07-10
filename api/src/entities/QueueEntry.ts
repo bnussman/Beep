@@ -24,8 +24,8 @@ export class QueueEntry {
     state: number = 0;
 
     @Field()
-    @Property({ default: false })
-    isAccepted!: boolean;
+    @Property()
+    isAccepted: boolean = false;
 
     @Field()
     @Property()
@@ -33,7 +33,7 @@ export class QueueEntry {
 
     @Field()
     @Property({ type: BigIntType }) 
-    start!: number;
+    start: number = Math.floor(Date.now() / 1000);
 
     @Field(() => User)
     @ManyToOne(() => User)
@@ -45,7 +45,7 @@ export class QueueEntry {
 
     @Field()
     @Property({ persist: false })
-    position?: number;
+    position: number = -1;
 
     constructor(values: Partial<QueueEntry>) {
         Object.assign(this, values);

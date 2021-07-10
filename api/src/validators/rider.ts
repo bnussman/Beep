@@ -36,7 +36,7 @@ export class FindBeepInput implements Point {
     
     @Field({ nullable: true })
     @IsNumber()
-    @Min(0.1)
+    @Min(0)
     @Max(30)
     radius: number = 10;
 }

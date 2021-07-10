@@ -20,7 +20,8 @@ export class UserResolver {
     @Query(() => User)
     @Authorized()
     public async getUser(@Ctx() ctx: Context, @Info() info: GraphQLResolveInfo, @Arg("id", { nullable: true }) id?: string): Promise<User> {
-        const relationPaths = fieldsToRelations(info);
+        const relationPaths = fieldsToRelations(info).filter((key: string) => key !== 'location');
+
         const user = await ctx.em.findOne(User, id || ctx.user.id, { populate: relationPaths, refresh: true });
 
         if (!user) {

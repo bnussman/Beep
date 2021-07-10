@@ -21,15 +21,11 @@ export class RiderResolver {
         }
 
         const q = new QueueEntry({
-            start: Math.floor(Date.now() / 1000),
-            isAccepted: false,
             groupSize: input.groupSize,
             origin: input.origin,
             destination: input.destination,
-            state: 0,
             rider: ctx.user,
             beeper: beeper,
-            position: -1,
         });
 
         pubSub.publish("Rider" + ctx.user.id, {
@@ -112,6 +108,10 @@ export class RiderResolver {
     @Query(() => [User])
     @Authorized()
     public async getBeeperList(@Ctx() ctx: Context, @Arg('input') input: FindBeepInput): Promise<User[]> {
+        if (input.radius == 0) {
+            return await ctx.em.find(User, { isBeeping: true });
+        }
+
         const connection = ctx.em.getConnection();
 
         const raw: User[] = await connection.execute(`

@@ -36,12 +36,6 @@ export type Beep = {
   end: Scalars['DateTime'];
 };
 
-export type BeepHistoryResponse = {
-  __typename?: 'BeepHistoryResponse';
-  items: Array<Beep>;
-  count: Scalars['Int'];
-};
-
 export type BeeperSettingsInput = {
   singlesRate?: Maybe<Scalars['Float']>;
   groupRate?: Maybe<Scalars['Float']>;
@@ -91,6 +85,12 @@ export type EditUserValidator = {
   username?: Maybe<Scalars['String']>;
 };
 
+export type FindBeepInput = {
+  longitude: Scalars['Float'];
+  latitude: Scalars['Float'];
+  radius?: Maybe<Scalars['Float']>;
+};
+
 export type ForgotPassword = {
   __typename?: 'ForgotPassword';
   id: Scalars['String'];
@@ -102,26 +102,6 @@ export type GetBeepInput = {
   origin: Scalars['String'];
   destination: Scalars['String'];
   groupSize: Scalars['Float'];
-};
-
-export type Location = {
-  __typename?: 'Location';
-  id: Scalars['String'];
-  user: User;
-  latitude: Scalars['Float'];
-  longitude: Scalars['Float'];
-  altitude: Scalars['Float'];
-  accuracy?: Maybe<Scalars['Float']>;
-  altitudeAccuracy?: Maybe<Scalars['Float']>;
-  heading: Scalars['Float'];
-  speed: Scalars['Float'];
-  timestamp: Scalars['DateTime'];
-};
-
-export type LocationData = {
-  __typename?: 'LocationData';
-  longitude: Scalars['Float'];
-  latitude: Scalars['Float'];
 };
 
 export type LocationInput = {
@@ -142,6 +122,7 @@ export type LoginInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  setLocation: Scalars['Boolean'];
   editAccount: User;
   changePassword: Scalars['Boolean'];
   updatePushToken: Scalars['Boolean'];
@@ -159,7 +140,6 @@ export type Mutation = {
   setBeeperQueue: Scalars['Boolean'];
   cancelBeep: Scalars['Boolean'];
   deleteBeep: Scalars['Boolean'];
-  insertLocation: Scalars['Boolean'];
   rateUser: Scalars['Boolean'];
   deleteRating: Scalars['Boolean'];
   reportUser: Scalars['Boolean'];
@@ -169,6 +149,11 @@ export type Mutation = {
   riderLeaveQueue: Scalars['Boolean'];
   removeUser: Scalars['Boolean'];
   editUser: User;
+};
+
+
+export type MutationSetLocationArgs = {
+  location: LocationInput;
 };
 
 
@@ -247,11 +232,6 @@ export type MutationDeleteBeepArgs = {
 };
 
 
-export type MutationInsertLocationArgs = {
-  location: LocationInput;
-};
-
-
 export type MutationRateUserArgs = {
   input: RatingInput;
 };
@@ -292,6 +272,12 @@ export type MutationRemoveUserArgs = {
 export type MutationEditUserArgs = {
   data: EditUserValidator;
   id: Scalars['String'];
+};
+
+export type Point = {
+  __typename?: 'Point';
+  longitude: Scalars['Float'];
+  latitude: Scalars['Float'];
 };
 
 export type Query = {
@@ -361,6 +347,11 @@ export type QueryGetReportsArgs = {
 
 export type QueryGetReportArgs = {
   id: Scalars['String'];
+};
+
+
+export type QueryGetBeeperListArgs = {
+  input: FindBeepInput;
 };
 
 
@@ -448,12 +439,6 @@ export type ResetPasswordInput = {
   password: Scalars['String'];
 };
 
-export type RideHistoryResponse = {
-  __typename?: 'RideHistoryResponse';
-  items: Array<Beep>;
-  count: Scalars['Int'];
-};
-
 export type SignUpInput = {
   username: Scalars['String'];
   first: Scalars['String'];
@@ -469,19 +454,19 @@ export type SignUpInput = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  getLocationUpdates?: Maybe<Point>;
   getBeeperUpdates: Array<QueueEntry>;
-  getLocationUpdates?: Maybe<LocationData>;
   getRiderUpdates?: Maybe<QueueEntry>;
   getUserUpdates: User;
 };
 
 
-export type SubscriptionGetBeeperUpdatesArgs = {
+export type SubscriptionGetLocationUpdatesArgs = {
   topic: Scalars['String'];
 };
 
 
-export type SubscriptionGetLocationUpdatesArgs = {
+export type SubscriptionGetBeeperUpdatesArgs = {
   topic: Scalars['String'];
 };
 
@@ -543,7 +528,7 @@ export type User = {
   pushToken?: Maybe<Scalars['String']>;
   photoUrl?: Maybe<Scalars['String']>;
   name: Scalars['String'];
-  location?: Maybe<Location>;
+  location?: Maybe<Point>;
   queue: Array<QueueEntry>;
   ratings: Array<Rating>;
 };
@@ -608,13 +593,13 @@ export type GetRatingsQuery = (
     & Pick<RatingsResponse, 'count'>
     & { items: Array<(
       { __typename?: 'Rating' }
-      & Pick<Rating, 'id' | 'stars' | 'message' | 'timestamp'>
+      & Pick<Rating, 'id' | 'timestamp' | 'message' | 'stars'>
       & { rater: (
         { __typename?: 'User' }
-        & Pick<User, 'id' | 'photoUrl' | 'username' | 'name'>
+        & Pick<User, 'id' | 'name' | 'photoUrl' | 'username'>
       ), rated: (
         { __typename?: 'User' }
-        & Pick<User, 'id' | 'photoUrl' | 'username' | 'name'>
+        & Pick<User, 'id' | 'name' | 'photoUrl' | 'username'>
       ) }
     )> }
   ) }
@@ -777,10 +762,14 @@ export type VerifyAccountMutation = (
   & Pick<Mutation, 'verifyAccount'>
 );
 
-export type GetBeepersQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetBeeperListQueryVariables = Exact<{
+  latitude: Scalars['Float'];
+  longitude: Scalars['Float'];
+  radius?: Maybe<Scalars['Float']>;
+}>;
 
 
-export type GetBeepersQuery = (
+export type GetBeeperListQuery = (
   { __typename?: 'Query' }
   & { getBeeperList: Array<(
     { __typename?: 'User' }
@@ -1012,8 +1001,8 @@ export type BeepersLocationSubscriptionVariables = Exact<{
 export type BeepersLocationSubscription = (
   { __typename?: 'Subscription' }
   & { getLocationUpdates?: Maybe<(
-    { __typename?: 'LocationData' }
-    & Pick<LocationData, 'latitude' | 'longitude'>
+    { __typename?: 'Point' }
+    & Pick<Point, 'latitude' | 'longitude'>
   )> }
 );
 
@@ -1028,8 +1017,8 @@ export type GetUserQuery = (
     { __typename?: 'User' }
     & Pick<User, 'id' | 'name' | 'isBeeping' | 'isStudent' | 'role' | 'venmo' | 'cashapp' | 'singlesRate' | 'groupRate' | 'capacity' | 'masksRequired' | 'photoUrl' | 'queueSize' | 'phone' | 'username' | 'rating' | 'email'>
     & { location?: Maybe<(
-      { __typename?: 'Location' }
-      & Pick<Location, 'latitude' | 'longitude' | 'timestamp'>
+      { __typename?: 'Point' }
+      & Pick<Point, 'latitude' | 'longitude'>
     )>, queue: Array<(
       { __typename?: 'QueueEntry' }
       & Pick<QueueEntry, 'id' | 'origin' | 'destination' | 'start' | 'groupSize' | 'isAccepted' | 'state'>
@@ -1194,20 +1183,20 @@ export const GetRatingsDocument = gql`
   getRatings(id: $id, show: $show, offset: $offset) {
     items {
       id
-      stars
-      message
       timestamp
+      message
+      stars
       rater {
         id
+        name
         photoUrl
         username
-        name
       }
       rated {
         id
+        name
         photoUrl
         username
-        name
       }
     }
     count
@@ -1648,9 +1637,11 @@ export function useVerifyAccountMutation(baseOptions?: Apollo.MutationHookOption
 export type VerifyAccountMutationHookResult = ReturnType<typeof useVerifyAccountMutation>;
 export type VerifyAccountMutationResult = Apollo.MutationResult<VerifyAccountMutation>;
 export type VerifyAccountMutationOptions = Apollo.BaseMutationOptions<VerifyAccountMutation, VerifyAccountMutationVariables>;
-export const GetBeepersDocument = gql`
-    query GetBeepers {
-  getBeeperList {
+export const GetBeeperListDocument = gql`
+    query GetBeeperList($latitude: Float!, $longitude: Float!, $radius: Float) {
+  getBeeperList(
+    input: {latitude: $latitude, longitude: $longitude, radius: $radius}
+  ) {
     id
     username
     name
@@ -1666,31 +1657,34 @@ export const GetBeepersDocument = gql`
     `;
 
 /**
- * __useGetBeepersQuery__
+ * __useGetBeeperListQuery__
  *
- * To run a query within a React component, call `useGetBeepersQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetBeepersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetBeeperListQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBeeperListQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetBeepersQuery({
+ * const { data, loading, error } = useGetBeeperListQuery({
  *   variables: {
+ *      latitude: // value for 'latitude'
+ *      longitude: // value for 'longitude'
+ *      radius: // value for 'radius'
  *   },
  * });
  */
-export function useGetBeepersQuery(baseOptions?: Apollo.QueryHookOptions<GetBeepersQuery, GetBeepersQueryVariables>) {
+export function useGetBeeperListQuery(baseOptions: Apollo.QueryHookOptions<GetBeeperListQuery, GetBeeperListQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetBeepersQuery, GetBeepersQueryVariables>(GetBeepersDocument, options);
+        return Apollo.useQuery<GetBeeperListQuery, GetBeeperListQueryVariables>(GetBeeperListDocument, options);
       }
-export function useGetBeepersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBeepersQuery, GetBeepersQueryVariables>) {
+export function useGetBeeperListLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBeeperListQuery, GetBeeperListQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetBeepersQuery, GetBeepersQueryVariables>(GetBeepersDocument, options);
+          return Apollo.useLazyQuery<GetBeeperListQuery, GetBeeperListQueryVariables>(GetBeeperListDocument, options);
         }
-export type GetBeepersQueryHookResult = ReturnType<typeof useGetBeepersQuery>;
-export type GetBeepersLazyQueryHookResult = ReturnType<typeof useGetBeepersLazyQuery>;
-export type GetBeepersQueryResult = Apollo.QueryResult<GetBeepersQuery, GetBeepersQueryVariables>;
+export type GetBeeperListQueryHookResult = ReturnType<typeof useGetBeeperListQuery>;
+export type GetBeeperListLazyQueryHookResult = ReturnType<typeof useGetBeeperListLazyQuery>;
+export type GetBeeperListQueryResult = Apollo.QueryResult<GetBeeperListQuery, GetBeeperListQueryVariables>;
 export const DeleteBeepDocument = gql`
     mutation DeleteBeep($id: String!) {
   deleteBeep(id: $id)
@@ -2289,7 +2283,6 @@ export const GetUserDocument = gql`
     location {
       latitude
       longitude
-      timestamp
     }
     queue {
       id

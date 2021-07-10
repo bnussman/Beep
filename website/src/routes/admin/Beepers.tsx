@@ -6,8 +6,12 @@ import { Box, Center, Heading, Spinner, Table, Tbody, Td, Th, Thead, Tr } from '
 import TdUser from '../../components/TdUser';
 
 const BeepersGraphQL = gql`
-    query GetBeepers {
-        getBeeperList {
+    query GetBeeperList($latitude: Float!, $longitude: Float!, $radius: Float) {
+        getBeeperList(input: {
+            latitude: $latitude,
+            longitude: $longitude,
+            radius: $radius
+        })  {
             id
             username
             name
@@ -23,7 +27,7 @@ const BeepersGraphQL = gql`
 `;
 
 function Beepers() {
-  const { data, stopPolling, startPolling, loading } = useQuery<GetBeepersQuery>(BeepersGraphQL);
+    const { data, stopPolling, startPolling, loading } = useQuery<GetBeepersQuery>(BeepersGraphQL, {  variables: { latitude: 0, longitude: 0, radius: 0 }});
 
   useEffect(() => {
     startPolling(4000);
